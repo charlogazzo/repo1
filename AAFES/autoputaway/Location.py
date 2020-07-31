@@ -31,6 +31,9 @@ class Location:
     def getLocationCRC(self):
         return self.location_crc
     
+    def setLocationCRC(self, crc):
+        self.location_crc = crc
+    
     def getStaus(self):
         return self.status
     
@@ -116,6 +119,7 @@ class JDA:
     def addLoad(location, pallet):
         if location.getStatus() == "Empty":
             location.getLoads().append(pallet)
+            location.setLocationCRC(pallet.getProduct().getCRC())
             location.setStatus("Not Full")
         
         elif JDA().evaluate_potential_status(location, pallet) == "Eligible_Full":
