@@ -117,6 +117,13 @@ class JDA:
         if location.getStatus() == "Empty":
             location.getLoads().append(pallet)
             location.setStatus("Not Full")
+        
+        elif JDA().evaluate_potential_status(location, pallet) == "Eligible_Full":
+            location.getLoads().append()
+            location.setStatus("Full")
+            
+        else:
+            location.getLoads().append(pallet)
             
     
     #Prints all the locations in a warehouse, the products contained in them, their CRCs and number of cases
