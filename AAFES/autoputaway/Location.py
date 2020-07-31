@@ -1,4 +1,4 @@
-
+import math
 
 class Warehouse:
     def __init__(self, name, *locations):
@@ -17,6 +17,7 @@ class Location:
         self.max_height = height
         self.loads = []
         self.location_crc = None
+        self.status = "Empty"
         
     def getName(self):
         return self.name
@@ -38,7 +39,7 @@ class Load:
     def getProduct(self):
         return self.product
     
-    def getCases(self):
+    def getCaseCount(self):
         return self.no_of_cases
         
 class Product:
@@ -57,6 +58,7 @@ class Product:
     def getCasesPerLayer(self):
         return self.cases_per_layer
     
+    # The height of a case is also the height of a layer
     def getCaseHeight(self):
         return self.case_height
 
@@ -75,13 +77,30 @@ class JDA:
             if (location.status == "Not Full" and 
             pallet.getProduct().getCRC() == location.getLocationCRC()):
                 return location
-    
+        
+        for location in warehouse.getLocations():
+            if location.getstatus() == "Empty":
+                return location
+            
     #Returns: Eligible or Ineligible
     @staticmethod
     def evaluate_potential_status(location, pallet):
-        pass
+        case_height = pallet.getProduct().getCRC()
+        cases_per_layer = pallet.getProduct().getCasesPerLayer()
+        current_case_count = 0
+        
+        for load in location.getLoads():
+            current_case_count += load.getCaseCount()
+        
+        total_cases = current_case_count + pallet.getCaseCount()
+        no_of_layers =  math.ceil((total_cases / cases_per_layer))
+        potential_height = no_of_layers * case_height
+        
+        if potential_height > location.getHeight():
+            return "Ineligible"
+        
     
-    #Returns: success of failure
+    #Returns: success or failure
     @staticmethod
     def addLoad(location, pallet):
         pass
