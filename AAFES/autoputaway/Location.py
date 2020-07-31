@@ -31,6 +31,12 @@ class Location:
     def getLocationCRC(self):
         return self.location_crc
     
+    def getStaus(self):
+        return self.status
+    
+    def setStatus(self, status):
+        self.status = status
+    
 class Load:
     def __init__(self, product, amount):
         self.product = product
@@ -98,12 +104,20 @@ class JDA:
         
         if potential_height > location.getHeight():
             return "Ineligible"
+        elif potential_height == location.getHeight():
+            return "Eligible_Full"
+        else:
+            return "Eligible"
         
-    
+    # Also write code to tell JDA to set the status to "full"
+    # If the maximum height has been reached exactly
     #Returns: success or failure
     @staticmethod
     def addLoad(location, pallet):
-        pass
+        if location.getStatus() == "Empty":
+            location.getLoads().append(pallet)
+            location.setStatus("Not Full")
+            
     
     #Prints all the locations in a warehouse, the products contained in them, their CRCs and number of cases
     @staticmethod
