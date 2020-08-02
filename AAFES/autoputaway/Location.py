@@ -18,8 +18,9 @@ class Location:
         self.loads = []
         self.location_crc = None
         self.status = "Empty"
+        self.number_of_cases = 0
         
-    def getName(self):
+    def getLocationName(self):
         return self.name
     
     def getHeight(self):
@@ -39,6 +40,9 @@ class Location:
     
     def setStatus(self, status):
         self.status = status
+        
+    def getNumberOfCases(self):
+        return self.number_of_cases
     
 class Load:
     def __init__(self, product, amount):
@@ -50,6 +54,9 @@ class Load:
     
     def getCaseCount(self):
         return self.no_of_cases
+    
+    def setCaseCount(self, count):
+        self.no_of_cases = count
         
 class Product:
     def __init__(self, name, crc, per_layer, height):
@@ -58,7 +65,7 @@ class Product:
         self.cases_per_layer = per_layer
         self.case_height = height
         
-    def getName(self):
+    def getProductName(self):
         return self.name
     
     def getCRC(self):
@@ -128,9 +135,38 @@ class JDA:
             
         else:
             location.getLoads().append(pallet)
-            
     
-    #Prints all the locations in a warehouse, the products contained in them, their CRCs and number of cases
+    # This method must be run after any load is added to a location        
     @staticmethod
-    def warehouseLocationSummary():
-        pass
+    def calculateNumberOfCases(location):
+        case_count = 0
+        
+        for load in location.getLoads():
+            case_count += load.getCaseCount()
+        
+        location.setCaseCount(case_count)
+    
+    # Prints all the locations in a warehouse, the products contained in them, their CRCs and number of cases
+    # Returns a list of lists showing each location's Product name, CRC, Number of cases in the location and the location status
+    @staticmethod
+    def warehouseLocationSummary(warehouse):
+        output_list = []
+        
+        for location in warehouse.getLocations():
+            location_summary = []
+            
+            # Remember this is just one location. It could be empty and in such a case, write code to show that
+            # it is empty. Remember: Reader friendly output
+            if location.getStaus() == "Empty":
+                location_summary = [location.getLocationName(), "No products", "", "0", location.getStaus()]
+            else:
+                location_summary.append(location.getLocationName())
+                location_summary.append((location.getLoads()[0]).getProduct().getName())
+                location_summary.append(location.getLocationCRC())
+                location_summary.append(str(location.getCaseCount()))
+                location_summary.append(location.getStaus())
+            
+            output_list.append(location_summary)
+        
+        return output_list
+        
