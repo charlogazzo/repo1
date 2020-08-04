@@ -45,9 +45,13 @@ class Location:
         return self.number_of_cases
     
 class Load:
-    def __init__(self, product, amount):
+    def __init__(self, number, product, amount):
+        self.load_number = number
         self.product = product
         self.no_of_cases = amount
+        
+    def getLoadNumber(self):
+        return self.load_number
         
     def getProduct(self):
         return self.product
@@ -121,7 +125,7 @@ class JDA:
         
     # Also write code to tell JDA to set the status to "full"
     # If the maximum height has been reached exactly
-    #Returns: success or failure
+    # Returns: success or failure
     @staticmethod
     def addLoad(location, pallet):
         if location.getStatus() == "Empty":
@@ -169,4 +173,30 @@ class JDA:
             output_list.append(location_summary)
         
         return output_list
-        
+
+# defining the products. later versions will use a database
+p1 = Product("Coca-Cola 12oz", "7381338", 20, 8)
+p2 = Product("Jack Daniels", "4312481", 13, 40)
+p3 = Product("Disarnonno", "1241217", 13, 20)
+p4 = Product("Grey Goose", "4112462", 25, 50)
+p5 = Product("Crown Royal", "8394291", 8, 25)
+
+# defining the loads. These are the loads that will be placed in the location initially
+# More will be added to test the functionality of the program
+l1 = Load("2000012010", p1, 500)
+l2 = Load("2000012011", p2, 100)
+l3 = Load("2000012012", p3, 80)
+l4 = Load("2000012013", p4, 120)
+l5 = Load("2000012014", p5, 70)
+
+# Defining the locations
+loc1 = Location("Bulk 1", 300)
+loc2 = Location("Bulk 2", 350)
+loc3 = Location("Rack 1", 80)
+loc4 = Location("Rack 2", 100)
+loc5 = Location("Bulk 3", 270)
+loc6 = Location("Rack 3", 100)
+loc7 = Location("Rack 4", 40)
+
+# The sole warehouse object
+wh = Warehouse("WH_A", loc1, loc2, loc3, loc4, loc5, loc6, loc7)
