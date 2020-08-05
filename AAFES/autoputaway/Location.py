@@ -84,6 +84,7 @@ class Product:
 
 class JDA:
     
+    # This method will be used when the application starts reading data from a database
     @staticmethod
     def prepareLoad(product, case_amount):
         pallet = Load(product, case_amount)
@@ -105,7 +106,7 @@ class JDA:
     #Returns: Eligible or Ineligible
     @staticmethod
     def evaluate_potential_status(location, pallet):
-        case_height = pallet.getProduct().getCRC()
+        case_height = pallet.getProduct().getCaseHeight()
         cases_per_layer = pallet.getProduct().getCasesPerLayer()
         current_case_count = 0
         
@@ -134,7 +135,7 @@ class JDA:
             location.setStatus("Not Full")
         
         elif JDA().evaluate_potential_status(location, pallet) == "Eligible_Full":
-            location.getLoads().append()
+            location.getLoads().append(pallet)
             location.setStatus("Full")
             
         else:
@@ -200,3 +201,20 @@ loc7 = Location("Rack 4", 40)
 
 # The sole warehouse object
 wh = Warehouse("WH_A", loc1, loc2, loc3, loc4, loc5, loc6, loc7)
+
+# Used only to test the evaluate_potntial_status method
+# status = JDA().evaluate_potential_status(loc7, l1)
+# print(status)
+
+# A trailer of pallets (loads) comes in from the receiving warehouse
+trailer = [l1, l2, l3, l4, l5]
+
+for pallet in trailer:
+    location = JDA().find_eligible_location(wh, pallet)
+    
+    if JDA().evaluate_potential_status(location, pallet) == "Eligible":
+        print("An eligible location was found: " + location.getLocationName())
+        JDA().addLoad(location, pallet)
+        print(pallet.getLoadNumber() + "has been added to " + location.getLocationName())
+    else:
+        print("No eligible location was found")
