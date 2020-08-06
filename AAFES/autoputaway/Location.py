@@ -1,4 +1,5 @@
 import math
+from prettytable import *
 
 class Warehouse:
     def __init__(self, name, *locations):
@@ -35,14 +36,17 @@ class Location:
     def setLocationCRC(self, crc):
         self.location_crc = crc
     
-    def getStaus(self):
+    def getStatus(self):
         return self.status
     
     def setStatus(self, status):
         self.status = status
         
-    def getNumberOfCases(self):
+    def getCaseCount(self):
         return self.number_of_cases
+    
+    def setCaseCount(self, no_of_cases):
+        self.number_of_cases = no_of_cases
     
 class Load:
     def __init__(self, number, product, amount):
@@ -100,7 +104,7 @@ class JDA:
                 return location
         
         for location in warehouse.getLocations():
-            if location.getstatus() == "Empty":
+            if location.getStatus() == "Empty":
                 return location
             
     #Returns: Eligible or Ineligible
@@ -162,14 +166,14 @@ class JDA:
             
             # Remember this is just one location. It could be empty and in such a case, write code to show that
             # it is empty. Remember: Reader friendly output
-            if location.getStaus() == "Empty":
-                location_summary = [location.getLocationName(), "No products", "", "0", location.getStaus()]
+            if location.getStatus() == "Empty":
+                location_summary = [location.getLocationName(), "No products", "", "0", location.getStatus()]
             else:
                 location_summary.append(location.getLocationName())
-                location_summary.append((location.getLoads()[0]).getProduct().getName())
+                location_summary.append((location.getLoads()[0]).getProduct().getProductName())
                 location_summary.append(location.getLocationCRC())
                 location_summary.append(str(location.getCaseCount()))
-                location_summary.append(location.getStaus())
+                location_summary.append(location.getStatus())
             
             output_list.append(location_summary)
         
@@ -215,6 +219,20 @@ for pallet in trailer:
     if JDA().evaluate_potential_status(location, pallet) == "Eligible":
         print("An eligible location was found: " + location.getLocationName())
         JDA().addLoad(location, pallet)
+        JDA().calculateNumberOfCases(location)
         print(pallet.getLoadNumber() + "has been added to " + location.getLocationName())
     else:
-        print("No eligible location was found")
+        print("No eligible location was found for: " + pallet.getLoadNumber())
+
+# We will use prettytable to format out the data at the end        
+summary_list = JDA().warehouseLocationSummary(wh)
+t = PrettyTable(['', 'Location', 'Product', 'CRC Number', 'Available Cases', 'Location Status'])
+
+index = 1
+for entry in summary_list:
+    entry.insert(0, index)
+    index += 1
+    
+    t.add_row(entry)
+
+print(t)
