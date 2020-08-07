@@ -214,15 +214,34 @@ wh = Warehouse("WH_A", loc1, loc2, loc3, loc4, loc5, loc6, loc7)
 trailer = [l1, l2, l3, l4, l5]
 
 for pallet in trailer:
-    location = JDA().find_eligible_location(wh, pallet)
     
-    if JDA().evaluate_potential_status(location, pallet) == "Eligible":
-        print("An eligible location was found: " + location.getLocationName())
-        JDA().addLoad(location, pallet)
-        JDA().calculateNumberOfCases(location)
-        print(pallet.getLoadNumber() + "has been added to " + location.getLocationName())
-    else:
-        print("No eligible location was found for: " + pallet.getLoadNumber())
+    # Modify the code to first return all the eligible locations and then go through all of them
+    # with another for-loop on the current pallet to evaluate the potential status
+    eligible_locations = []
+    
+    for location in wh.getLocations():
+        # The Warehouse object seems to be redundant here.
+        # Consider changing the method to just accept a pallet.
+        # That will very likely solve the issue more elegantly
+        suitable_location = JDA().find_eligible_location(wh, pallet)
+        eligible_locations.append(suitable_location)
+        
+    for loc in eligible_locations:
+        if JDA().evaluate_potential_status(loc, pallet) == "Eligible":
+            print("An eligible location was found: " + location.getLocationName())
+            JDA().addLoad(location, pallet)
+            JDA().calculateNumberOfCases(location)
+            print(pallet.getLoadNumber() + " has been added to " + location.getLocationName())
+    
+    #===========================================================================
+    # if JDA().evaluate_potential_status(location, pallet) == "Eligible":
+    #     print("An eligible location was found: " + location.getLocationName())
+    #     JDA().addLoad(location, pallet)
+    #     JDA().calculateNumberOfCases(location)
+    #     print(pallet.getLoadNumber() + " has been added to " + location.getLocationName())
+    # else:
+    #     print("No eligible location was found for: " + pallet.getLoadNumber())
+    #===========================================================================
 
 # We will use prettytable to format out the data at the end        
 summary_list = JDA().warehouseLocationSummary(wh)
