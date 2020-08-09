@@ -47,12 +47,16 @@ class Location:
     
     def setCaseCount(self, no_of_cases):
         self.number_of_cases = no_of_cases
+        
+    def __str__(self):
+        return self.name
     
 class Load:
     def __init__(self, number, product, amount):
         self.load_number = number
         self.product = product
         self.no_of_cases = amount
+        self.location = None
         
     def getLoadNumber(self):
         return self.load_number
@@ -65,6 +69,12 @@ class Load:
     
     def setCaseCount(self, count):
         self.no_of_cases = count
+        
+    def getLoadLocation(self):
+        return self.location
+    
+    def setLoadLocation(self, location):
+        self.location = location
         
 class Product:
     def __init__(self, name, crc, per_layer, height):
@@ -130,21 +140,35 @@ class JDA:
         
     # Also write code to tell JDA to set the status to "full"
     # If the maximum height has been reached exactly
+    # We have to add the location attribute to each load. How else are we supposed to track the allocation of each load
     # Returns: success or failure
     @staticmethod
-    def addLoad(location, pallet):
-        if location.getStatus() == "Empty":
-            location.getLoads().append(pallet)
-            location.setLocationCRC(pallet.getProduct().getCRC())
-            location.setStatus("Not Full")
-        
-        elif JDA().evaluate_potential_status(location, pallet) == "Eligible_Full":
-            location.getLoads().append(pallet)
-            location.setStatus("Full")
+    def addLoad(warehouse, pallet):
+        for location in warehouse.getLocations():
+            if location.getStatus() == "Empty":
+                if JDA().evaluate_potential_status(location, pallet) == "Eligible_Full":
+                    location.getLoads().append(pallet)
+                    pallet.setLoadLocation(location.getLocationName())
+                    location.setLocationCRC(pallet.getProduct().getCRC())
+                    location.setStatus("Full")
+                elif JDA().evaluate_potential_status(location, pallet) == "Eligible":
+                    location.getLoads().append(pallet)
+                    pallet.setLoadLocation(location.getLocationName())
+                    location.setLocationCRC(pallet.getProduct().getCRC())
+                    location.setStatus("Not Full")
+                else:
+                    continue
             
-        else:
-            location.getLoads().append(pallet)
-    
+            if location.getStatus() == "Not Full" and location.getLocationCRC() == pallet.getProduct().getCRC():
+                if JDA().evaluate_potential_status(location, pallet) == "Eligible_Full":
+                    location.getLoads().append(pallet)
+                    pallet.setLoadLocation(location.getLocationName())
+                    location.setStatus("Full")
+                elif JDA().evaluate_potential_status(location, pallet) == "Eligible":
+                    location.getLoads().append(pallet)
+                    pallet.setLoadLocation(location.getLocationName())
+        
+        
     # This method must be run after any load is added to a location        
     @staticmethod
     def calculateNumberOfCases(location):
@@ -213,35 +237,7 @@ wh = Warehouse("WH_A", loc1, loc2, loc3, loc4, loc5, loc6, loc7)
 # A trailer of pallets (loads) comes in from the receiving warehouse
 trailer = [l1, l2, l3, l4, l5]
 
-for pallet in trailer:
-    
-    # Modify the code to first return all the eligible locations and then go through all of them
-    # with another for-loop on the current pallet to evaluate the potential status
-    eligible_locations = []
-    
-    for location in wh.getLocations():
-        # The Warehouse object seems to be redundant here.
-        # Consider changing the method to just accept a pallet.
-        # That will very likely solve the issue more elegantly
-        suitable_location = JDA().find_eligible_location(wh, pallet)
-        eligible_locations.append(suitable_location)
-        
-    for loc in eligible_locations:
-        if JDA().evaluate_potential_status(loc, pallet) == "Eligible":
-            print("An eligible location was found: " + location.getLocationName())
-            JDA().addLoad(location, pallet)
-            JDA().calculateNumberOfCases(location)
-            print(pallet.getLoadNumber() + " has been added to " + location.getLocationName())
-    
-    #===========================================================================
-    # if JDA().evaluate_potential_status(location, pallet) == "Eligible":
-    #     print("An eligible location was found: " + location.getLocationName())
-    #     JDA().addLoad(location, pallet)
-    #     JDA().calculateNumberOfCases(location)
-    #     print(pallet.getLoadNumber() + " has been added to " + location.getLocationName())
-    # else:
-    #     print("No eligible location was found for: " + pallet.getLoadNumber())
-    #===========================================================================
+
 
 # We will use prettytable to format out the data at the end        
 summary_list = JDA().warehouseLocationSummary(wh)
