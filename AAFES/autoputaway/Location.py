@@ -176,10 +176,7 @@ class JDA:
                     pallet.setLoadLocation(location)
                     break
         
-        if pallet.getLoadLocation() == None:
-            return None
-        else:        
-            return pallet.getLoadLocation()
+        return pallet.getLoadLocation()
         
     # This method must be run after any load is added to a location        
     @staticmethod
@@ -230,14 +227,24 @@ l3 = Load("2000012012", p3, 80)
 l4 = Load("2000012013", p4, 120)
 l5 = Load("2000012014", p5, 70)
 
-# Defining the locations
+# The original locations were modified by increasing their max_height to test and see if all
+# the pallets in the trailer would be allocated if the size constraints were removed
 loc1 = Location("Bulk 1", 300)
 loc2 = Location("Bulk 2", 350)
-loc3 = Location("Rack 1", 80)
-loc4 = Location("Rack 2", 100)
-loc5 = Location("Bulk 3", 270)
-loc6 = Location("Rack 3", 100)
-loc7 = Location("Rack 4", 40)
+loc3 = Location("Bulk 3", 480)
+loc4 = Location("Bulk 4", 400)
+loc5 = Location("Bulk 5", 470)
+loc6 = Location("Bulk 6", 400)
+loc7 = Location("Bulk 7", 440)
+
+# The Original locations
+# loc1 = Location("Bulk 1", 300)
+# loc2 = Location("Bulk 2", 350)
+# loc3 = Location("Rack 1", 80)
+# loc4 = Location("Rack 2", 100)
+# loc5 = Location("Bulk 3", 270)
+# loc6 = Location("Rack 3", 100)
+# loc7 = Location("Rack 4", 40)
 
 # The sole warehouse object
 wh = Warehouse("WH_A", loc1, loc2, loc3, loc4, loc5, loc6, loc7)
@@ -249,15 +256,22 @@ wh = Warehouse("WH_A", loc1, loc2, loc3, loc4, loc5, loc6, loc7)
 # A trailer of pallets (loads) comes in from the receiving warehouse
 trailer = [l1, l2, l3, l4, l5]
 
+# Using this algorithm, the issue is that the after the first pallet is added
+# to a location and it is removed, the loop counter takes the pallet occupying
+# the next index and since pallet 1 has taken the place previously belonging
+# to pallet 0, the for loop will skip it an go on to pallet 2 which now occupies the
+# position that belonged to pallet 1.
+
+# Possible Solution: Stop removing the pallets after they are added.
 for pallet in trailer:
     location = JDA().addLoad(wh, pallet)
     print(location)
     
-    if location == None:
+    if location is None:
         print("No Suitable location was found for " + pallet.getLoadNumber())
     else:
         print(pallet.getLoadNumber() + " was added to " + location.getLocationName())
-        trailer.remove(pallet)
+        #trailer.remove(pallet)
     
 
 # We will use prettytable to format out the data at the end        
