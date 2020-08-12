@@ -175,6 +175,15 @@ class JDA:
                     JDA().calculateNumberOfCases(location)
                     pallet.setLoadLocation(location)
                     break
+            
+            # We will make the program check if the status of the location is not full
+            # but the total number of loads fits fully in another location
+            # Then we can the program can tell us which alternate location there is
+            # to tranfer the current loads to in order for the current load to occupy the
+            # current location.
+            
+            elif location.getStatus() == "Not Full" and JDA().evaluate_potential_status(location, pallet) == "Eligible":
+                pass
         
         return pallet.getLoadLocation()
         
@@ -229,22 +238,22 @@ l5 = Load("2000012014", p5, 70)
 
 # The original locations were modified by increasing their max_height to test and see if all
 # the pallets in the trailer would be allocated if the size constraints were removed
-loc1 = Location("Bulk 1", 300)
-loc2 = Location("Bulk 2", 350)
-loc3 = Location("Bulk 3", 480)
-loc4 = Location("Bulk 4", 400)
-loc5 = Location("Bulk 5", 470)
-loc6 = Location("Bulk 6", 400)
-loc7 = Location("Bulk 7", 440)
-
-# The Original locations
 # loc1 = Location("Bulk 1", 300)
 # loc2 = Location("Bulk 2", 350)
-# loc3 = Location("Rack 1", 80)
-# loc4 = Location("Rack 2", 100)
-# loc5 = Location("Bulk 3", 270)
-# loc6 = Location("Rack 3", 100)
-# loc7 = Location("Rack 4", 40)
+# loc3 = Location("Bulk 3", 480)
+# loc4 = Location("Bulk 4", 400)
+# loc5 = Location("Bulk 5", 470)
+# loc6 = Location("Bulk 6", 400)
+# loc7 = Location("Bulk 7", 440)
+
+# The Original locations
+loc1 = Location("Bulk 1", 300)
+loc2 = Location("Bulk 2", 350)
+loc3 = Location("Rack 1", 80)
+loc4 = Location("Rack 2", 100)
+loc5 = Location("Bulk 3", 270)
+loc6 = Location("Rack 3", 100)
+loc7 = Location("Rack 4", 40)
 
 # The sole warehouse object
 wh = Warehouse("WH_A", loc1, loc2, loc3, loc4, loc5, loc6, loc7)
