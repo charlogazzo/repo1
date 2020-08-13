@@ -145,15 +145,16 @@ class JDA:
     @staticmethod
     def addLoad(warehouse, pallet):
         for location in warehouse.getLocations():
+            potential_status = JDA().evaluate_potential_status(location, pallet)
             if location.getStatus() == "Empty":
-                if JDA().evaluate_potential_status(location, pallet) == "Eligible_Full":
+                if potential_status == "Eligible_Full":
                     location.getLoads().append(pallet)
                     JDA().calculateNumberOfCases(location)
                     pallet.setLoadLocation(location)
                     location.setLocationCRC(pallet.getProduct().getCRC())
                     location.setStatus("Full")
                     break
-                elif JDA().evaluate_potential_status(location, pallet) == "Eligible":
+                elif potential_status == "Eligible":
                     location.getLoads().append(pallet)
                     JDA().calculateNumberOfCases(location)
                     pallet.setLoadLocation(location)
@@ -164,13 +165,13 @@ class JDA:
                     continue
             
             elif location.getStatus() == "Not Full" and location.getLocationCRC() == pallet.getProduct().getCRC():
-                if JDA().evaluate_potential_status(location, pallet) == "Eligible_Full":
+                if potential_status == "Eligible_Full":
                     location.getLoads().append(pallet)
                     JDA().calculateNumberOfCases(location)
                     pallet.setLoadLocation(location)
                     location.setStatus("Full")
                     break
-                elif JDA().evaluate_potential_status(location, pallet) == "Eligible":
+                elif potential_status == "Eligible":
                     location.getLoads().append(pallet)
                     JDA().calculateNumberOfCases(location)
                     pallet.setLoadLocation(location)
@@ -182,9 +183,23 @@ class JDA:
             # to tranfer the current loads to in order for the current load to occupy the
             # current location.
             
-            elif location.getStatus() == "Not Full" and JDA().evaluate_potential_status(location, pallet) == "Eligible":
-                pass
-        
+            elif location.getStatus() == "Not Full" and potential_status == "Eligible":
+                transient_loads = location.getLoads()
+                l_num = transient_loads[0].getLoadNumber()
+                prod = transient_loads[0].getProduct()
+                num_of_cases = 0
+                
+                for load in transient_loads:
+                    num_of_cases += load.getCaseCount()
+                    
+                transient_pallet = Load(l_num, prod, num_of_cases)
+                
+                # This code is inefficient. We are having to run the same algorithm twice because this
+                # was initially written in the addLoad() method and not in the evaluate_potential_status()
+                # method. Later we have to move that part of the method to the evaluate_potential_status() method
+                
+                
+                
         return pallet.getLoadLocation()
         
     # This method must be run after any load is added to a location        
