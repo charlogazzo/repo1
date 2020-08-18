@@ -1,5 +1,6 @@
 import math
 from prettytable import *
+import psycopg2
 
 class Warehouse:
     def __init__(self, name, *locations):
@@ -184,15 +185,16 @@ class JDA:
             # current location.
             
             elif location.getStatus() == "Not Full" and potential_status == "Eligible":
-                transient_loads = location.getLoads()
-                l_num = transient_loads[0].getLoadNumber()
-                prod = transient_loads[0].getProduct()
-                num_of_cases = 0
-                
-                for load in transient_loads:
-                    num_of_cases += load.getCaseCount()
-                    
-                transient_pallet = Load(l_num, prod, num_of_cases)
+                pass
+#                 transient_loads = location.getLoads()
+#                 l_num = transient_loads[0].getLoadNumber()
+#                 prod = transient_loads[0].getProduct()
+#                 num_of_cases = 0
+#                 
+#                 for load in transient_loads:
+#                     num_of_cases += load.getCaseCount()
+#                     
+#                 transient_pallet = Load(l_num, prod, num_of_cases)
                 
                 # This code is inefficient. We are having to run the same algorithm twice because this
                 # was initially written in the addLoad() method and not in the evaluate_potential_status()
@@ -251,6 +253,8 @@ l3 = Load("2000012012", p3, 80)
 l4 = Load("2000012013", p4, 120)
 l5 = Load("2000012014", p5, 70)
 
+
+
 # The original locations were modified by increasing their max_height to test and see if all
 # the pallets in the trailer would be allocated if the size constraints were removed
 # loc1 = Location("Bulk 1", 300)
@@ -270,8 +274,39 @@ loc5 = Location("Bulk 3", 270)
 loc6 = Location("Rack 3", 100)
 loc7 = Location("Rack 4", 40)
 
+
+
 # The sole warehouse object
 wh = Warehouse("WH_A", loc1, loc2, loc3, loc4, loc5, loc6, loc7)
+
+# This was inserted to test the PostgreSQL module in the main Python script
+try:
+    connection = psycopg2.connect(user="postgres",
+                                  password="password",
+                                  host="127.0.0.1",
+                                  port="5432",
+                                  database="autoputaway")
+    cursor = connection.cursor()
+
+    postgres_insert_query = """ INSERT INTO "Warehouse" ("Name", "Locations") VALUES (%s, %s)"""
+    record_to_insert = [("WH_A", [loc1.getLocationName(), loc2.getLocationName(), loc3.getLocationName(), loc4.getLocationName(), loc5.getLocationName(), loc6.getLocationName(), loc7.getLocationName()])]
+    cursor.executemany(postgres_insert_query, record_to_insert)
+
+    connection.commit()
+    count = cursor.rowcount
+    print (count, "Record inserted successfully into mobile table")
+
+except (Exception, psycopg2.Error) as error :
+    if(connection):
+        print("Failed to insert record into mobile table", error)
+
+finally:
+    #closing database connection.
+    if(connection):
+        cursor.close()
+        connection.close()
+        print("PostgreSQL connection is closed")
+
 
 # Used only to test the evaluate_potntial_status method
 # status = JDA().evaluate_potential_status(loc7, l1)
