@@ -1,6 +1,7 @@
 import math
 from prettytable import *
 import psycopg2
+from pip._internal.req.req_uninstall import compress_for_output_listing
 
 class Warehouse:
     def __init__(self, name, *locations):
@@ -238,32 +239,54 @@ class JDA:
         
         return output_list
 
+# Attempting to read product data from the database
+product_list = []
+try:
+    connection = psycopg2.connect(user="postgres",
+                                  password="password",
+                                  host="127.0.0.1",
+                                  port="5432",
+                                  database="autoputaway")
+    cursor = connection.cursor()
+    postgreSQL_select_Query = 'select * from "Product"'
+
+    cursor.execute(postgreSQL_select_Query)
+    print("Selecting rows from product table using cursor.fetchall")
+    products = cursor.fetchall() 
+    print("Print each row and it's columns values")
+    for product in products:
+        print("Name = ", product[0], )
+        print("CRC = ", product[1])
+        print("Cases per Layer  = ", product[2])
+        print("Cases Height = ", product[3], "\n")
+        
+        temp_product = Product(product[0], product[1], product[2], product[3])
+        product_list.append(temp_product)
+
+except (Exception, psycopg2.Error) as error :
+    print ("Error while fetching data from PostgreSQL", error)
+
+finally:
+    #closing database connection.
+    if(connection):
+        cursor.close()
+        connection.close()
+        print("PostgreSQL connection is closed")
+
 # defining the products. later versions will use a database
-p1 = Product("Coca-Cola 12oz", "7381338", 20, 8)
-p2 = Product("Jack Daniels", "4312481", 13, 40)
-p3 = Product("Disarnonno", "1241217", 13, 20)
-p4 = Product("Grey Goose", "4112462", 25, 50)
-p5 = Product("Crown Royal", "8394291", 8, 25)
+# p1 = Product("Coca-Cola 12oz", "7381338", 20, 8)
+# p2 = Product("Jack Daniels", "4312481", 13, 40)
+# p3 = Product("Disarnonno", "1241217", 13, 20)
+# p4 = Product("Grey Goose", "4112462", 25, 50)
+# p5 = Product("Crown Royal", "8394291", 8, 25)
 
 # defining the loads. These are the loads that will be placed in the location initially
 # More will be added to test the functionality of the program
-l1 = Load("2000012010", p1, 500)
-l2 = Load("2000012011", p2, 100)
-l3 = Load("2000012012", p3, 80)
-l4 = Load("2000012013", p4, 120)
-l5 = Load("2000012014", p5, 70)
-
-
-
-# The original locations were modified by increasing their max_height to test and see if all
-# the pallets in the trailer would be allocated if the size constraints were removed
-# loc1 = Location("Bulk 1", 300)
-# loc2 = Location("Bulk 2", 350)
-# loc3 = Location("Bulk 3", 480)
-# loc4 = Location("Bulk 4", 400)
-# loc5 = Location("Bulk 5", 470)
-# loc6 = Location("Bulk 6", 400)
-# loc7 = Location("Bulk 7", 440)
+l1 = Load("2000012010", product_list[0], 500)
+l2 = Load("2000012011", product_list[1], 100)
+l3 = Load("2000012012", product_list[2], 80)
+l4 = Load("2000012013", product_list[3], 120)
+l5 = Load("2000012014", product_list[4], 70)
 
 # The Original locations
 loc1 = Location("Bulk 1", 300)
@@ -275,38 +298,10 @@ loc6 = Location("Rack 3", 100)
 loc7 = Location("Rack 4", 40)
 
 
-
 # The sole warehouse object
 wh = Warehouse("WH_A", loc1, loc2, loc3, loc4, loc5, loc6, loc7)
 
 # This was inserted to test the PostgreSQL module in the main Python script
-try:
-    connection = psycopg2.connect(user="postgres",
-                                  password="password",
-                                  host="127.0.0.1",
-                                  port="5432",
-                                  database="autoputaway")
-    cursor = connection.cursor()
-
-    postgres_insert_query = """ INSERT INTO "Warehouse" ("Name", "Locations") VALUES (%s, %s)"""
-    record_to_insert = [("WH_A", [loc1.getLocationName(), loc2.getLocationName(), loc3.getLocationName(), loc4.getLocationName(), loc5.getLocationName(), loc6.getLocationName(), loc7.getLocationName()])]
-    cursor.executemany(postgres_insert_query, record_to_insert)
-
-    connection.commit()
-    count = cursor.rowcount
-    print (count, "Record inserted successfully into mobile table")
-
-except (Exception, psycopg2.Error) as error :
-    if(connection):
-        print("Failed to insert record into mobile table", error)
-
-finally:
-    #closing database connection.
-    if(connection):
-        cursor.close()
-        connection.close()
-        print("PostgreSQL connection is closed")
-
 
 # Used only to test the evaluate_potntial_status method
 # status = JDA().evaluate_potential_status(loc7, l1)
