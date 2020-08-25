@@ -1,7 +1,7 @@
 import math
 from prettytable import *
 import psycopg2
-from pip._internal.req.req_uninstall import compress_for_output_listing
+import itertools
 
 class Warehouse:
     def __init__(self, name, *locations):
@@ -240,38 +240,48 @@ class JDA:
         return output_list
 
 # Attempting to read product data from the database
-product_list = []
-try:
-    connection = psycopg2.connect(user="postgres",
-                                  password="password",
-                                  host="127.0.0.1",
-                                  port="5432",
-                                  database="autoputaway")
-    cursor = connection.cursor()
-    postgreSQL_select_Query = 'select * from "Product"'
-
-    cursor.execute(postgreSQL_select_Query)
-    print("Selecting rows from product table using cursor.fetchall")
-    products = cursor.fetchall() 
-    print("Print each row and it's columns values")
-    for product in products:
-        print("Name = ", product[0], )
-        print("CRC = ", product[1])
-        print("Cases per Layer  = ", product[2])
-        print("Cases Height = ", product[3], "\n")
+def locationSummary():
+    product_list = []
+    try:
+        connection = psycopg2.connect(user="postgres",
+                                      password="password",
+                                      host="127.0.0.1",
+                                      port="5432",
+                                      database="autoputaway")
+        cursor = connection.cursor()
+        postgreSQL_select_Query = 'select * from "Product"'
+    
+        cursor.execute(postgreSQL_select_Query)
+        print("Selecting rows from product table using cursor.fetchall")
+        products = cursor.fetchall() 
+        print("Print each row and it's columns values")
         
-        temp_product = Product(product[0], product[1], product[2], product[3])
-        product_list.append(temp_product)
-
-except (Exception, psycopg2.Error) as error :
-    print ("Error while fetching data from PostgreSQL", error)
-
-finally:
-    #closing database connection.
-    if(connection):
-        cursor.close()
-        connection.close()
-        print("PostgreSQL connection is closed")
+        desc = cursor.description
+        column_names = [col[0] for col in desc]
+        data = [dict(zip(column_names, row)) for row in products]
+        
+        print(data)
+        
+        for product in products:
+            print("Name = ", product[0], )
+            print("CRC = ", product[1])
+            print("Cases per Layer  = ", product[2])
+            print("Cases Height = ", product[3], "\n")
+            
+            temp_product = Product(product[0], product[1], product[2], product[3])
+            product_list.append(temp_product)
+    
+    except (Exception, psycopg2.Error) as error :
+        print ("Error while fetching data from PostgreSQL", error)
+    
+    finally:
+        #closing database connection.
+        if(connection):
+            cursor.close()
+            connection.close()
+            print("PostgreSQL connection is closed")
+    
+    return data
 
 # defining the products. later versions will use a database
 # p1 = Product("Coca-Cola 12oz", "7381338", 20, 8)
