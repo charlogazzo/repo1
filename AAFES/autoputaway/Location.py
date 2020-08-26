@@ -292,11 +292,11 @@ def locationSummary():
 
 # defining the loads. These are the loads that will be placed in the location initially
 # More will be added to test the functionality of the program
-l1 = Load("2000012010", product_list[0], 500)
-l2 = Load("2000012011", product_list[1], 100)
-l3 = Load("2000012012", product_list[2], 80)
-l4 = Load("2000012013", product_list[3], 120)
-l5 = Load("2000012014", product_list[4], 70)
+# l1 = Load("2000012010", product_list[0], 500)
+# l2 = Load("2000012011", product_list[1], 100)
+# l3 = Load("2000012012", product_list[2], 80)
+# l4 = Load("2000012013", product_list[3], 120)
+# l5 = Load("2000012014", product_list[4], 70)
 
 # The Original locations
 loc1 = Location("Bulk 1", 300)
@@ -318,7 +318,7 @@ wh = Warehouse("WH_A", loc1, loc2, loc3, loc4, loc5, loc6, loc7)
 # print(status)
 
 # A trailer of pallets (loads) comes in from the receiving warehouse
-trailer = [l1, l2, l3, l4, l5]
+#trailer = [l1, l2, l3, l4, l5]
 
 # Using this algorithm, the issue is that the after the first pallet is added
 # to a location and it is removed, the loop counter takes the pallet occupying
@@ -327,14 +327,14 @@ trailer = [l1, l2, l3, l4, l5]
 # position that belonged to pallet 1.
 
 # Possible Solution: Stop removing the pallets after they are added.
-for pallet in trailer:
-    location = JDA().addLoad(wh, pallet)
-    print(location)
-    
-    if location is None:
-        print("No Suitable location was found for " + pallet.getLoadNumber())
-    else:
-        print(pallet.getLoadNumber() + " was added to " + location.getLocationName())
+# for pallet in trailer:
+#     location = JDA().addLoad(wh, pallet)
+#     print(location)
+#     
+#     if location is None:
+#         print("No Suitable location was found for " + pallet.getLoadNumber())
+#     else:
+#         print(pallet.getLoadNumber() + " was added to " + location.getLocationName())
         #trailer.remove(pallet)
     
 
