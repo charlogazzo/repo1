@@ -1,0 +1,1 @@
+from django.shortcuts import renderfrom autoputawayapp . import Locationdef home(request):    passdef productList(request):    product_details = Location.locationSummary()        context = {'products': product_details}        return render(request, 'autoputawayapp/display.html', context)
