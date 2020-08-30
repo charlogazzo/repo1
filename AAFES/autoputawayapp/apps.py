@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class AutoputawayAppConfig(AppConfig):
+class AutoputawayappConfig(AppConfig):
     name = 'autoputawayapp'
